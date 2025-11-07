@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} /app/builder --config=co
 
 FROM scratch
 ARG VARIANT
-COPY --from=builder app/mdai-datadog-collector /
+COPY --from=builder app/cmd/mdai-datadog-collector /
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 EXPOSE 4317/tcp 4318/tcp 8126/tcp 8891/tcp 8899/tcp 13133/tcp
 USER 65533:65533
