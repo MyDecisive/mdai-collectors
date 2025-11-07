@@ -9,7 +9,7 @@ on:
 
 jobs:
   docker-push:
-    uses: DecisiveAI/ci/.github/workflows/docker-push-to-ecr.yml@main
+    uses: DecisiveAI/ci/.github/workflows/docker-push-to-ghcr.yml@main
     with:
       image_name_suffix: mdai-datadog-collector
       dockerfile_name: mdai-datadog-collector.Dockerfile
