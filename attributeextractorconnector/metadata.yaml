@@ -1,0 +1,7 @@
+type: attributeextractor
+github_project: decisiveai/mdai-collectors
+
+status:
+  class: connector
+  stability:
+    development: [traces_to_metrics, metrics_to_metrics, logs_to_metrics]

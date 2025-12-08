@@ -33,16 +33,17 @@ exporters:
       enabled: true
 
 connectors:
-  datavolume/observer1:
-    label_resource_attributes:
-      - service.name
-    count_metric_name: items_received_by_service_total
-    bytes_metric_name: bytes_received_by_service_total
-  datavolume/observer2:
-    label_resource_attributes:
-      - service.name
-    count_metric_name: items_sent_by_service_total
-    bytes_metric_name: bytes_sent_by_service_total
+#  datavolume/observer1:
+#    label_resource_attributes:
+#      - service.name
+#    count_metric_name: items_received_by_service_total
+#    bytes_metric_name: bytes_received_by_service_total
+#  datavolume/observer2:
+#    label_resource_attributes:
+#      - service.name
+#    count_metric_name: items_sent_by_service_total
+#    bytes_metric_name: bytes_sent_by_service_total
+  attributeextractor: {}
 
 extensions:
   cgroupruntime:
@@ -61,15 +62,31 @@ service:
                 host: '0.0.0.0'
                 port: 8888
   pipelines:
-    logs/observer1:
+#    logs/observer1:
+#      receivers: [otlp]
+#      processors: [filter/observer1, groupbyattrs/observer1]
+#      exporters: [datavolume/observer1]
+#    logs/observer2:
+#      receivers: [otlp]
+#      processors: [filter/observer2, groupbyattrs/observer2]
+#      exporters: [datavolume/observer2]
+#    metrics/observeroutput:
+#      receivers: [datavolume/observer1, datavolume/observer2]
+#      processors: [deltatocumulative]
+#      exporters: [prometheus,debug]
+    logs:
       receivers: [otlp]
-      processors: [filter/observer1, groupbyattrs/observer1]
-      exporters: [datavolume/observer1]
-    logs/observer2:
+      processors: []
+      exporters: [attributeextractor]
+    metrics:
       receivers: [otlp]
-      processors: [filter/observer2, groupbyattrs/observer2]
-      exporters: [datavolume/observer2]
-    metrics/observeroutput:
-      receivers: [datavolume/observer1, datavolume/observer2]
+      processors: []
+      exporters: [attributeextractor]
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [attributeextractor]
+    metrics/attrextract:
+      receivers: [attributeextractor]
       processors: [deltatocumulative]
       exporters: [prometheus,debug]

@@ -1,0 +1,78 @@
+resourceMetrics:
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceA
+        - key: data_type
+          value:
+            stringValue: logs
+    scopeMetrics:
+      - metrics:
+          - name: service_count_total
+            sum:
+              aggregationTemporality: 1
+              dataPoints:
+                - asInt: "4"
+                  timeUnixNano: "1678390948393725000"
+                  startTimeUnixNano: "1678390948393725000"
+              isMonotonic: true
+        scope: {}
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceB
+        - key: data_type
+          value:
+            stringValue: logs
+    scopeMetrics:
+      - metrics:
+          - name: service_count_total
+            sum:
+              aggregationTemporality: 1
+              dataPoints:
+                - asInt: "4"
+                  timeUnixNano: "1678390948393759000"
+                  startTimeUnixNano: "1678390948393725000"
+              isMonotonic: true
+        scope: {}
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceA
+        - key: data_type
+          value:
+            stringValue: logs
+    scopeMetrics:
+      - metrics:
+          - name: service_count_total
+            sum:
+              aggregationTemporality: 1
+              dataPoints:
+                - asInt: "4"
+                  timeUnixNano: "1678390948393725000"
+                  startTimeUnixNano: "1678390948393725000"
+              isMonotonic: true
+        scope: {}
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceA
+        - key: data_type
+          value:
+            stringValue: logs
+    scopeMetrics:
+      - metrics:
+          - name: service_count_total
+            sum:
+              aggregationTemporality: 1
+              dataPoints:
+                - asInt: "5"
+                  timeUnixNano: "1678390948393725000"
+                  startTimeUnixNano: "1678390948393725000"
+              isMonotonic: true
+        scope: { }
+

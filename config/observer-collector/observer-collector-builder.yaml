@@ -5,30 +5,32 @@ dist:
 
 
 exporters:
-  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.121.0
-  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.121.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.121.0
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.141.0
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.141.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.141.0
 
 
 processors:
-  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.121.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.121.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.121.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatocumulativeprocessor v0.121.0
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.141.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.141.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.141.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatocumulativeprocessor v0.141.0
 
 
 receivers:
-  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.121.0
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.141.0
 
 
 connectors:
-  - gomod: github.com/decisiveai/mdai-collectors/datavolumeconnector v0.1.3
+#  - gomod: github.com/decisiveai/mdai-collectors/datavolumeconnector v0.1.3
+  - gomod: github.com/decisiveai/mdai-collectors/attributeextractorconnector v0.1.3
 
 extensions:
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/cgroupruntimeextension v0.121.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/cgroupruntimeextension v0.141.0
 
 replaces:
   # a list of "replaces" directives that will be part of the resulting go.mod
 
   # This replace statement is necessary since the newly added component is not found/published to GitHub yet. Replace references to GitHub path with the local path
-  - github.com/decisiveai/mdai-collectors/datavolumeconnector => ../../datavolumeconnector
+#  - github.com/decisiveai/mdai-collectors/datavolumeconnector => ../../datavolumeconnector
+  - github.com/decisiveai/mdai-collectors/attributeextractorconnector => ../../attributeextractorconnector

@@ -1,0 +1,186 @@
+resourceLogs:
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceA
+        - key: region
+          value:
+            stringValue: east
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: WARNING
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: ERROR
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+        scope: {}
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceB
+        - key: region
+          value:
+            stringValue: west
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: ERROR
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+        scope: {}
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceA
+        - key: region
+          value:
+            stringValue: west
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+        scope: {}
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: serviceA
+        - key: region
+          value:
+            stringValue: west
+    scopeLogs:
+      - logRecords:
+          - attributes:
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+          - attributes:
+              - key: log_level
+                value:
+                  stringValue: INFO
+            body:
+              stringValue: Super awesome log message!
+            spanId: ""
+            timeUnixNano: "1736889934967986176"
+            traceId: ""
+        scope: {}
