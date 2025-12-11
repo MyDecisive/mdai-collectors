@@ -1,0 +1,74 @@
+resourceMetrics:
+  - scopeMetrics:
+      # Resource Attribute
+      - scope:
+          name: "resource"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "traces"
+                    # service_name omitted intentionally
+                    - key: scope
+                      value:
+                        stringValue: "resource"
+                    - key: name
+                      value:
+                        stringValue: "deployment.environment"
+                    - key: type
+                      value:
+                        stringValue: "str(Xxxxxxxxxx)"
+              aggregationTemporality: 2
+              isMonotonic: true
+
+      # Span Attribute: http.method
+      - scope:
+          name: "span"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "traces"
+                    - key: scope
+                      value:
+                        stringValue: "span"
+                    - key: name
+                      value:
+                        stringValue: "http.method"
+                    - key: type
+                      value:
+                        stringValue: "str(XXX)"
+              aggregationTemporality: 2
+              isMonotonic: true
+
+      # Span Attribute: retry_count
+      - scope:
+          name: "span"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "traces"
+                    - key: scope
+                      value:
+                        stringValue: "span"
+                    - key: name
+                      value:
+                        stringValue: "retry_count"
+                    - key: type
+                      value:
+                        stringValue: "int"
+              aggregationTemporality: 2
+              isMonotonic: true

@@ -21,12 +21,12 @@ spec:
     spec:
       containers:
         - name: observer-collector
-          image: public.ecr.aws/p3k6k6h3/observer-collector:0.1
+          image: public.ecr.aws/decisiveai/observer-collector:0.1.5
           ports:
             - containerPort: 8888
               name: otelcol-metrics
             - containerPort: 8899
-              name: observer-metrics
+              name: obs-metrics
             - containerPort: 4317
               name: otlp-grpc
             - containerPort: 4318

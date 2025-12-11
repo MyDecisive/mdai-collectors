@@ -1,0 +1,19 @@
+resourceSpans:
+  - resource:
+      attributes:
+        # service.name missing
+        - key: deployment.environment
+          value:
+            stringValue: "Production"
+    scopeSpans:
+      - scope:
+          name: "trace.scope"
+        spans:
+          - name: "operation-a"
+            attributes:
+              - key: http.method
+                value:
+                  stringValue: "GET"
+              - key: retry_count
+                value:
+                  intValue: "3"

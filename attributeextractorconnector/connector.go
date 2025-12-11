@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -28,6 +29,8 @@ const (
 	dataTypeLogsAttributeValue    = "logs"
 	dataTypeTracesAttributeValue  = "traces"
 	dataTypeMetricsAttributeValue = "metrics"
+	mapSeparator                  = "|"
+	missingServicePlaceholder     = "missing-service"
 )
 
 func newConnector(logger *zap.Logger, config component.Config) (*connectorImp, error) {
@@ -82,8 +85,16 @@ func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]in
 	attributeMaskMap := make(map[string]int64)
 
 	for _, resourceLog := range logs.ResourceLogs().All() {
-		for key, value := range resourceLog.Resource().Attributes().All() {
-			maskMapKey := getAttributeMapKey("resource", value, key)
+		resourceAttrs := resourceLog.Resource().Attributes()
+		var serviceName string
+		if serviceNameAttr, serviceAttrExists := resourceAttrs.Get("service.name"); serviceAttrExists {
+			serviceName = serviceNameAttr.Str()
+		}
+		for key, value := range resourceAttrs.All() {
+			if key == "service.name" {
+				continue
+			}
+			maskMapKey := getAttributeMapKey("resource", serviceName, value, key)
 			if _, ok := attributeMaskMap[maskMapKey]; !ok {
 				attributeMaskMap[maskMapKey] = 1
 			} else {
@@ -92,7 +103,7 @@ func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]in
 		}
 		for _, scopeLog := range resourceLog.ScopeLogs().All() {
 			for key, value := range scopeLog.Scope().Attributes().All() {
-				maskMapKey := getAttributeMapKey("scope", value, key)
+				maskMapKey := getAttributeMapKey("scope", serviceName, value, key)
 				if _, ok := attributeMaskMap[maskMapKey]; !ok {
 					attributeMaskMap[maskMapKey] = 1
 				} else {
@@ -101,7 +112,7 @@ func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]in
 			}
 			for _, logRecord := range scopeLog.LogRecords().All() {
 				for key, value := range logRecord.Attributes().All() {
-					maskMapKey := getAttributeMapKey("logRecord", value, key)
+					maskMapKey := getAttributeMapKey("logRecord", serviceName, value, key)
 					if _, ok := attributeMaskMap[maskMapKey]; !ok {
 						attributeMaskMap[maskMapKey] = 1
 					} else {
@@ -118,8 +129,16 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 	attributeMaskMap := make(map[string]int64)
 
 	for _, resourceMetric := range metrics.ResourceMetrics().All() {
-		for key, value := range resourceMetric.Resource().Attributes().All() {
-			maskMapKey := getAttributeMapKey("resource", value, key)
+		resourceAttrs := resourceMetric.Resource().Attributes()
+		var serviceName string
+		if serviceNameAttr, serviceAttrExists := resourceAttrs.Get("service.name"); serviceAttrExists {
+			serviceName = serviceNameAttr.Str()
+		}
+		for key, value := range resourceAttrs.All() {
+			if key == "service.name" {
+				continue
+			}
+			maskMapKey := getAttributeMapKey("resource", serviceName, value, key)
 			if _, ok := attributeMaskMap[maskMapKey]; !ok {
 				attributeMaskMap[maskMapKey] = 1
 			} else {
@@ -128,7 +147,7 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 		}
 		for _, scopeMetric := range resourceMetric.ScopeMetrics().All() {
 			for key, value := range scopeMetric.Scope().Attributes().All() {
-				maskMapKey := getAttributeMapKey("scope", value, key)
+				maskMapKey := getAttributeMapKey("scope", serviceName, value, key)
 				if _, ok := attributeMaskMap[maskMapKey]; !ok {
 					attributeMaskMap[maskMapKey] = 1
 				} else {
@@ -137,7 +156,7 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 			}
 			for _, metric := range scopeMetric.Metrics().All() {
 				for key, value := range metric.Metadata().All() {
-					maskMapKey := getAttributeMapKey("metric.metadata", value, key)
+					maskMapKey := getAttributeMapKey("metric.metadata", serviceName, value, key)
 					if _, ok := attributeMaskMap[maskMapKey]; !ok {
 						attributeMaskMap[maskMapKey] = 1
 					} else {
@@ -154,8 +173,16 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 	attributeMaskMap := make(map[string]int64)
 
 	for _, resourceSpan := range traces.ResourceSpans().All() {
-		for key, value := range resourceSpan.Resource().Attributes().All() {
-			maskMapKey := getAttributeMapKey("resource", value, key)
+		resourceAttrs := resourceSpan.Resource().Attributes()
+		var serviceName string
+		if serviceNameAttr, serviceAttrExists := resourceAttrs.Get("service.name"); serviceAttrExists {
+			serviceName = serviceNameAttr.Str()
+		}
+		for key, value := range resourceAttrs.All() {
+			if key == "service.name" {
+				continue
+			}
+			maskMapKey := getAttributeMapKey("resource", serviceName, value, key)
 			if _, ok := attributeMaskMap[maskMapKey]; !ok {
 				attributeMaskMap[maskMapKey] = 1
 			} else {
@@ -164,7 +191,7 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 		}
 		for _, scopeSpan := range resourceSpan.ScopeSpans().All() {
 			for key, value := range scopeSpan.Scope().Attributes().All() {
-				maskMapKey := getAttributeMapKey("scope", value, key)
+				maskMapKey := getAttributeMapKey("scope", serviceName, value, key)
 				if _, ok := attributeMaskMap[maskMapKey]; !ok {
 					attributeMaskMap[maskMapKey] = 1
 				} else {
@@ -173,7 +200,7 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 			}
 			for _, span := range scopeSpan.Spans().All() {
 				for key, value := range span.Attributes().All() {
-					maskMapKey := getAttributeMapKey("span", value, key)
+					maskMapKey := getAttributeMapKey("span", serviceName, value, key)
 					if _, ok := attributeMaskMap[maskMapKey]; !ok {
 						attributeMaskMap[maskMapKey] = 1
 					} else {
@@ -188,61 +215,85 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 
 func (c *connectorImp) createOutputMetrics(outputMetrics pmetric.Metrics, attributeMaskMap map[string]int64, dataType string, timestamp pcommon.Timestamp) error {
 	outputResourceMetrics := outputMetrics.ResourceMetrics().AppendEmpty()
-	for key, value := range attributeMaskMap {
+
+	keys := make([]string, 0, len(attributeMaskMap))
+	for k := range attributeMaskMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		value := attributeMaskMap[key]
 		outputScopeMetric := outputResourceMetrics.ScopeMetrics().AppendEmpty()
-		scope := outputScopeMetric.Scope()
+		splitKey := strings.Split(key, mapSeparator)
+		outputScopeMetric.Scope().SetName(splitKey[1])
 		rawAttributes := map[string]any{
 			dataTypeAttributeKey: dataType,
-			"attribute":          key,
+			"scope":              splitKey[1],
+			"name":               splitKey[2],
+			"type":               splitKey[3],
 		}
-		err := scope.Attributes().FromRaw(rawAttributes)
+		if splitKey[0] != missingServicePlaceholder {
+			rawAttributes["service_name"] = splitKey[0]
+		}
+		err := c.addOutputMetricToScopeMetrics(outputScopeMetric, "attr_extract_encounter_total", timestamp, value, rawAttributes)
 		if err != nil {
-			c.logger.Error("Error adding attributes to datavolume metrics for logs measurement", zap.Error(err))
 			return err
 		}
-		addOutputMetricToScopeMetrics(outputScopeMetric, "attribute_encounter", timestamp, value)
 	}
 	return nil
 }
 
-func getAttributeMapKey(prefix string, value pcommon.Value, key string) string {
+func getAttributeMapKey(attrScope string, attrServiceName string, value pcommon.Value, attrKey string) string {
+	serviceName := attrServiceName
+	if serviceName == "" {
+		serviceName = missingServicePlaceholder
+	}
 	valueType := value.Type()
-	var maskMapKey string
+	var typeStr string
 	switch valueType {
 	case pcommon.ValueTypeStr:
 		valueStr := value.AsString()
-		maskMapKey = fmt.Sprintf("%s.%s.str(%s)", prefix, key, maskString(valueStr))
+		typeStr = fmt.Sprintf("str(%s)", maskString(valueStr))
 	case pcommon.ValueTypeInt:
-		maskMapKey = fmt.Sprintf("%s.%s.int", prefix, key)
+		typeStr = "int"
 	case pcommon.ValueTypeBool:
-		maskMapKey = fmt.Sprintf("%s.%s.bool", prefix, key)
+		typeStr = "bool"
 	case pcommon.ValueTypeDouble:
-		maskMapKey = fmt.Sprintf("%s.%s.double", prefix, key)
+		typeStr = "double"
 	case pcommon.ValueTypeBytes:
-		maskMapKey = fmt.Sprintf("%s.%s.bytes", prefix, key)
+		typeStr = "bytes"
 	case pcommon.ValueTypeEmpty:
-		maskMapKey = fmt.Sprintf("%s.%s.empty", prefix, key)
+		typeStr = "empty"
 	case pcommon.ValueTypeSlice:
-		maskMapKey = fmt.Sprintf("%s.%s.slice", prefix, key)
+		typeStr = "slice"
 	case pcommon.ValueTypeMap:
-		maskMapKey = fmt.Sprintf("%s.%s.map", prefix, key)
+		typeStr = "map"
 	default:
-		maskMapKey = fmt.Sprintf("%s.%s", prefix, key)
+		typeStr = "unknown"
 	}
+
+	maskMapKey := serviceName + mapSeparator + attrScope + mapSeparator + attrKey + mapSeparator + typeStr
 
 	return maskMapKey
 }
 
-func addOutputMetricToScopeMetrics(scopeMetric pmetric.ScopeMetrics, metricName string, timestamp pcommon.Timestamp, value int64) {
+func (c *connectorImp) addOutputMetricToScopeMetrics(scopeMetric pmetric.ScopeMetrics, metricName string, timestamp pcommon.Timestamp, value int64, rawAttributes map[string]any) error {
 	metric := scopeMetric.Metrics().AppendEmpty()
 	metric.SetName(metricName)
 	sum := metric.SetEmptySum()
 	sum.SetIsMonotonic(true)
-	sum.SetAggregationTemporality(pmetric.AggregationTemporalityDelta)
+	sum.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 	dataPoints := sum.DataPoints()
 	dataPoint := dataPoints.AppendEmpty()
 	dataPoint.SetTimestamp(timestamp)
 	dataPoint.SetIntValue(value)
+	err := dataPoint.Attributes().FromRaw(rawAttributes)
+	if err != nil {
+		c.logger.Error("Error adding attributes to datavolume metrics for logs measurement", zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 func maskString(input string) string {

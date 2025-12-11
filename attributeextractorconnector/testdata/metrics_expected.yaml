@@ -1,0 +1,55 @@
+resourceMetrics:
+  - scopeMetrics:
+      # Resource Attribute: db.system
+      - scope:
+          name: "resource"
+        metrics:
+        - name: attr_extract_encounter_total
+          sum:
+            dataPoints:
+              - asInt: "1"
+                attributes:
+                  - key: data_type
+                    value:
+                      stringValue: "metrics"
+                  - key: service_name
+                    value:
+                      stringValue: "database-service"
+                  - key: scope
+                    value:
+                      stringValue: "resource"
+                  - key: name
+                    value:
+                      stringValue: "db.system"
+                  - key: type
+                    value:
+                      stringValue: "str(xxxxxxxxxx)"
+            aggregationTemporality: 2
+            isMonotonic: true
+
+      # Scope Attribute: exporter.name
+      - scope:
+          name: "scope"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "metrics"
+                    - key: service_name
+                      value:
+                        stringValue: "database-service"
+                    - key: scope
+                      value:
+                        stringValue: "scope"
+                    - key: name
+                      value:
+                        stringValue: "exporter.name"
+                    - key: type
+                      value:
+                        stringValue: "str(xxxx)"
+              aggregationTemporality: 2
+              isMonotonic: true

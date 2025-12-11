@@ -1,0 +1,22 @@
+resourceMetrics:
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: "database-service"
+        - key: db.system
+          value:
+            stringValue: "postgresql"
+    scopeMetrics:
+      - scope:
+          name: "otel.collector"
+          attributes:
+            - key: exporter.name
+              value:
+                stringValue: "otlp"
+        metrics:
+          - name: "operation.duration"
+            unit: "ms"
+            sum:
+              dataPoints:
+                - asInt: "100"

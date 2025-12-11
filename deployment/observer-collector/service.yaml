@@ -12,4 +12,12 @@ spec:
       targetPort: otlp-grpc
       protocol: TCP
       name: otlp-grpc
+    - port: 4318
+      targetPort: otlp-http
+      protocol: TCP
+      name: otlp-http
+    - port: 8899
+      targetPort: obs-metrics
+      protocol: TCP
+      name: obs-metrics
   type: ClusterIP

@@ -7,42 +7,21 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
-  groupbyattrs/observer1:
-    keys:
-      - service.name
-  groupbyattrs/observer2:
-    keys:
-      - service.name
   deltatocumulative: {}
 
-  filter/observer1:
-    logs:
-      log_record:
-        - 'resource.attributes["observer_direction"] != "received"'
-  filter/observer2:
-    logs:
-      log_record:
-        - 'resource.attributes["observer_direction"] != "exported"'
-
 exporters:
-  debug:
+  debug: {}
   prometheus:
     endpoint: 0.0.0.0:8899
     metric_expiration: 180m
     resource_to_telemetry_conversion:
       enabled: true
+  otlphttp/prom:
+    endpoint: http://prometheus-operated.mdai.svc.cluster.local/api/v1:4318
+    tls:
+      insecure: true
 
 connectors:
-#  datavolume/observer1:
-#    label_resource_attributes:
-#      - service.name
-#    count_metric_name: items_received_by_service_total
-#    bytes_metric_name: bytes_received_by_service_total
-#  datavolume/observer2:
-#    label_resource_attributes:
-#      - service.name
-#    count_metric_name: items_sent_by_service_total
-#    bytes_metric_name: bytes_sent_by_service_total
   attributeextractor: {}
 
 extensions:
@@ -62,18 +41,6 @@ service:
                 host: '0.0.0.0'
                 port: 8888
   pipelines:
-#    logs/observer1:
-#      receivers: [otlp]
-#      processors: [filter/observer1, groupbyattrs/observer1]
-#      exporters: [datavolume/observer1]
-#    logs/observer2:
-#      receivers: [otlp]
-#      processors: [filter/observer2, groupbyattrs/observer2]
-#      exporters: [datavolume/observer2]
-#    metrics/observeroutput:
-#      receivers: [datavolume/observer1, datavolume/observer2]
-#      processors: [deltatocumulative]
-#      exporters: [prometheus,debug]
     logs:
       receivers: [otlp]
       processors: []
@@ -86,6 +53,10 @@ service:
       receivers: [otlp]
       processors: []
       exporters: [attributeextractor]
+    metrics/attrextractprom:
+      receivers: [attributeextractor]
+      processors: []
+      exporters: [otlphttp/prom]
     metrics/attrextract:
       receivers: [attributeextractor]
       processors: [deltatocumulative]

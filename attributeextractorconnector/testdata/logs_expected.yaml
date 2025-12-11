@@ -1,0 +1,136 @@
+resourceMetrics:
+  - scopeMetrics:
+      # Log Record Attribute: http.status_code
+      - scope:
+          name: "logRecord"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "logs"
+                    - key: service_name
+                      value:
+                        stringValue: "payment-service"
+                    - key: scope
+                      value:
+                        stringValue: "logRecord"
+                    - key: name
+                      value:
+                        stringValue: "http.status_code"
+                    - key: type
+                      value:
+                        stringValue: "int"
+              aggregationTemporality: 2
+              isMonotonic: true
+
+      # Log Record Attribute: user.id
+      - scope:
+          name: "logRecord"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "logs"
+                    - key: service_name
+                      value:
+                        stringValue: "payment-service"
+                    - key: scope
+                      value:
+                        stringValue: "logRecord"
+                    - key: name
+                      value:
+                        stringValue: "user.id"
+                    - key: type
+                      value:
+                        stringValue: "str(Xxxx111)"
+              aggregationTemporality: 2
+              isMonotonic: true
+
+      # Resource Attribute: cloud.region
+      - scope:
+          name: "resource"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "logs"
+                    - key: service_name
+                      value:
+                        stringValue: "payment-service"
+                    - key: scope
+                      value:
+                        stringValue: "resource"
+                    - key: name
+                      value:
+                        stringValue: "cloud.region"
+                    - key: type
+                      value:
+                        stringValue: "str(xx-xxxx-1)"
+              aggregationTemporality: 2
+              isMonotonic: true
+
+      # Resource Attribute: host.name
+      - scope:
+          name: "resource"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "logs"
+                    - key: service_name
+                      value:
+                        stringValue: "payment-service"
+                    - key: scope
+                      value:
+                        stringValue: "resource"
+                    - key: name
+                      value:
+                        stringValue: "host.name"
+                    - key: type
+                      value:
+                        stringValue: "str(xxxx-111)"
+              aggregationTemporality: 2
+              isMonotonic: true
+
+      # Scope Attribute: scope.attr
+      - scope:
+          name: "scope"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: "logs"
+                    - key: service_name
+                      value:
+                        stringValue: "payment-service"
+                    - key: scope
+                      value:
+                        stringValue: "scope"
+                    - key: name
+                      value:
+                        stringValue: "scope.attr"
+                    - key: type
+                      value:
+                        stringValue: "str(XxxxxXxx)"
+              aggregationTemporality: 2
+              isMonotonic: true

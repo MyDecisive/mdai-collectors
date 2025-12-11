@@ -1,0 +1,29 @@
+resourceLogs:
+  - resource:
+      attributes:
+        - key: service.name
+          value:
+            stringValue: "payment-service"
+        - key: cloud.region
+          value:
+            stringValue: "us-east-1"
+        - key: host.name
+          value:
+            stringValue: "host-001"
+    scopeLogs:
+      - scope:
+          name: "my.scope"
+          attributes:
+            - key: scope.attr
+              value:
+                stringValue: "ScopeVal"
+        logRecords:
+          - body:
+              stringValue: "Log message 1"
+            attributes:
+              - key: http.status_code
+                value:
+                  intValue: "200"
+              - key: user.id
+                value:
+                  stringValue: "User123"
