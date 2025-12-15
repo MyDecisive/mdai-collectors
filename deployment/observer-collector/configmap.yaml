@@ -28,7 +28,12 @@ data:
           insecure: true
     
     connectors:
-      attributeextractor: {}
+      attributeextractor:
+        add_attributes:
+          - key: foobar
+            value: barbaz
+        exclude_attributes:
+            - "fluent.tag"
     
     extensions:
       cgroupruntime:

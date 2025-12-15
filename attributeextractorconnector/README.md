@@ -29,3 +29,18 @@ Emits metrics based on incoming telemetry attributes by:
 * Attribute data type
   * For strings, the format of the string is also labeled for, i.e., 12345-7890 becomes 11111-11111; asdf-QWERTY-99 becomes xxxx-XXXXXX-11
 
+### Configuration
+
+* add_attributes: String type attributes to add to output metrics. If you need other types, use the transform or attributes processors
+* exclude_attributes: attributes to ignore on incoming telemetry. Will not be counted or appended to output metrics
+
+```yaml
+  connectors:
+    attributeextractor:
+      add_attributes:
+        - key: foobar
+          value: barbaz
+      exclude_attributes:
+          - "fluent.tag"
+```
+

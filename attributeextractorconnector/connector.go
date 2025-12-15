@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -30,7 +31,7 @@ const (
 	dataTypeTracesAttributeValue  = "traces"
 	dataTypeMetricsAttributeValue = "metrics"
 	mapSeparator                  = "|"
-	missingServicePlaceholder     = "missing-service"
+	missingServicePlaceholder     = "zz-missing-service-zz"
 
 	serviceNameAttribute = "service.name"
 	pdatumResourceScope  = "resource"
@@ -44,7 +45,7 @@ const (
 	attrTypeAttribueKey           = "type"
 	serviceNameOutputAttributeKey = "service_name"
 	attributeExtractMetricName    = "attr_extract_encounter_total"
-	
+
 	uppercaseMaskChar = 'X'
 	lowercaseMaskChar = 'x'
 	digitMaskChar     = '1'
@@ -117,7 +118,7 @@ func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]in
 			serviceName = serviceNameAttr.Str()
 		}
 		for key, value := range resourceAttrs.All() {
-			if key == serviceNameAttribute {
+			if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
 				continue
 			}
 			maskMapKey := getAttributeMapKey(pdatumResourceScope, serviceName, value, key)
@@ -138,6 +139,9 @@ func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]in
 			}
 			for _, logRecord := range scopeLog.LogRecords().All() {
 				for key, value := range logRecord.Attributes().All() {
+					if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+						continue
+					}
 					maskMapKey := getAttributeMapKey(logRecordScope, serviceName, value, key)
 					if _, ok := attributeMaskMap[maskMapKey]; !ok {
 						attributeMaskMap[maskMapKey] = 1
@@ -161,7 +165,7 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 			serviceName = serviceNameAttr.Str()
 		}
 		for key, value := range resourceAttrs.All() {
-			if key == serviceNameAttribute {
+			if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
 				continue
 			}
 			maskMapKey := getAttributeMapKey(pdatumResourceScope, serviceName, value, key)
@@ -173,6 +177,9 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 		}
 		for _, scopeMetric := range resourceMetric.ScopeMetrics().All() {
 			for key, value := range scopeMetric.Scope().Attributes().All() {
+				if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+					continue
+				}
 				maskMapKey := getAttributeMapKey(pdatumScopeScope, serviceName, value, key)
 				if _, ok := attributeMaskMap[maskMapKey]; !ok {
 					attributeMaskMap[maskMapKey] = 1
@@ -182,6 +189,9 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 			}
 			for _, metric := range scopeMetric.Metrics().All() {
 				for key, value := range metric.Metadata().All() {
+					if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+						continue
+					}
 					maskMapKey := getAttributeMapKey(metricMetadataScope, serviceName, value, key)
 					if _, ok := attributeMaskMap[maskMapKey]; !ok {
 						attributeMaskMap[maskMapKey] = 1
@@ -205,7 +215,7 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 			serviceName = serviceNameAttr.Str()
 		}
 		for key, value := range resourceAttrs.All() {
-			if key == serviceNameAttribute {
+			if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
 				continue
 			}
 			maskMapKey := getAttributeMapKey(pdatumResourceScope, serviceName, value, key)
@@ -217,6 +227,9 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 		}
 		for _, scopeSpan := range resourceSpan.ScopeSpans().All() {
 			for key, value := range scopeSpan.Scope().Attributes().All() {
+				if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+					continue
+				}
 				maskMapKey := getAttributeMapKey(pdatumScopeScope, serviceName, value, key)
 				if _, ok := attributeMaskMap[maskMapKey]; !ok {
 					attributeMaskMap[maskMapKey] = 1
@@ -226,6 +239,9 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 			}
 			for _, span := range scopeSpan.Spans().All() {
 				for key, value := range span.Attributes().All() {
+					if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+						continue
+					}
 					maskMapKey := getAttributeMapKey(spanScope, serviceName, value, key)
 					if _, ok := attributeMaskMap[maskMapKey]; !ok {
 						attributeMaskMap[maskMapKey] = 1
@@ -261,6 +277,9 @@ func (c *connectorImp) createOutputMetrics(outputMetrics pmetric.Metrics, attrib
 		}
 		if splitKey[0] != missingServicePlaceholder {
 			rawAttributes[serviceNameOutputAttributeKey] = splitKey[0]
+		}
+		for _, addingAttribute := range c.config.AddAttributes {
+			rawAttributes[addingAttribute.Key] = addingAttribute.Value
 		}
 		err := c.addOutputMetricToScopeMetrics(outputScopeMetric, attributeExtractMetricName, timestamp, value, rawAttributes)
 		if err != nil {
