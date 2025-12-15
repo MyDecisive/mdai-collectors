@@ -14,80 +14,167 @@ import (
 )
 
 func TestConsumeLogs(t *testing.T) {
-	inputLogs, err := golden.ReadLogs(filepath.Join("testdata", "logs_input.yaml"))
-	require.NoError(t, err)
-	expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "logs_expected.yaml"))
-	require.NoError(t, err)
+	testCases := []struct {
+		name         string
+		inputFile    string
+		expectedFile string
+		config       Config
+	}{
+		{
+			name:         "default_config",
+			inputFile:    "logs_input.yaml",
+			expectedFile: "logs_expected.yaml",
+			config:       Config{},
+		},
+		{
+			name:         "config_with_exclude_and_add",
+			inputFile:    "logs_input.yaml",
+			expectedFile: "logs_config_expected.yaml",
+			config: Config{
+				ExcludeAttributeKeys: []string{"host.name"},
+				AddAttributes: []AttributeExtractorAttribute{
+					{Key: "environment", Value: "testing"},
+				},
+			},
+		},
+	}
 
-	metricsSink := new(consumertest.MetricsSink)
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			inputLogs, err := golden.ReadLogs(filepath.Join("testdata", tt.inputFile))
+			require.NoError(t, err)
+			expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", tt.expectedFile))
+			require.NoError(t, err)
 
-	conn, err := newConnector(zap.NewNop(), &Config{})
-	require.NoError(t, err)
-	conn.metricsConsumer = metricsSink
+			metricsSink := new(consumertest.MetricsSink)
 
-	err = conn.ConsumeLogs(context.Background(), inputLogs)
-	require.NoError(t, err)
+			conn, err := newConnector(zap.NewNop(), &tt.config)
+			require.NoError(t, err)
+			conn.metricsConsumer = metricsSink
 
-	actualMetrics := metricsSink.AllMetrics()
-	require.Len(t, actualMetrics, 1)
+			err = conn.ConsumeLogs(context.Background(), inputLogs)
+			require.NoError(t, err)
 
-	require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics[0],
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-	))
+			actualMetrics := metricsSink.AllMetrics()
+			require.Len(t, actualMetrics, 1)
+
+			require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics[0],
+				pmetrictest.IgnoreTimestamp(),
+				pmetrictest.IgnoreMetricDataPointsOrder(),
+				pmetrictest.IgnoreResourceMetricsOrder(),
+				pmetrictest.IgnoreScopeMetricsOrder(),
+			))
+		})
+	}
 }
 
 func TestConsumeTraces(t *testing.T) {
-	inputTraces, err := golden.ReadTraces(filepath.Join("testdata", "traces_input.yaml"))
-	require.NoError(t, err)
-	expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "traces_expected.yaml"))
-	require.NoError(t, err)
+	testCases := []struct {
+		name         string
+		inputFile    string
+		expectedFile string
+		config       Config
+	}{
+		{
+			name:         "default_config",
+			inputFile:    "traces_input.yaml",
+			expectedFile: "traces_expected.yaml",
+			config:       Config{},
+		},
+		{
+			name:         "config_with_exclude_and_add",
+			inputFile:    "traces_input.yaml",
+			expectedFile: "traces_config_expected.yaml",
+			config: Config{
+				ExcludeAttributeKeys: []string{"http.method"},
+				AddAttributes: []AttributeExtractorAttribute{
+					{Key: "environment", Value: "testing"},
+				},
+			},
+		},
+	}
 
-	metricsSink := new(consumertest.MetricsSink)
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			inputTraces, err := golden.ReadTraces(filepath.Join("testdata", tt.inputFile))
+			require.NoError(t, err)
+			expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", tt.expectedFile))
+			require.NoError(t, err)
 
-	conn, err := newConnector(zap.NewNop(), &Config{})
-	require.NoError(t, err)
-	conn.metricsConsumer = metricsSink
+			metricsSink := new(consumertest.MetricsSink)
 
-	err = conn.ConsumeTraces(context.Background(), inputTraces)
-	require.NoError(t, err)
+			conn, err := newConnector(zap.NewNop(), &tt.config)
+			require.NoError(t, err)
+			conn.metricsConsumer = metricsSink
 
-	actualMetrics := metricsSink.AllMetrics()
-	require.Len(t, actualMetrics, 1)
+			err = conn.ConsumeTraces(context.Background(), inputTraces)
+			require.NoError(t, err)
 
-	require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics[0],
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-	))
+			actualMetrics := metricsSink.AllMetrics()
+			require.Len(t, actualMetrics, 1)
+
+			require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics[0],
+				pmetrictest.IgnoreTimestamp(),
+				pmetrictest.IgnoreMetricDataPointsOrder(),
+				pmetrictest.IgnoreResourceMetricsOrder(),
+				pmetrictest.IgnoreScopeMetricsOrder(),
+			))
+		})
+	}
 }
 
 func TestConsumeMetrics(t *testing.T) {
-	inputMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "metrics_input.yaml"))
-	require.NoError(t, err)
-	expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "metrics_expected.yaml"))
-	require.NoError(t, err)
+	testCases := []struct {
+		name         string
+		inputFile    string
+		expectedFile string
+		config       Config
+	}{
+		{
+			name:         "default_config",
+			inputFile:    "metrics_input.yaml",
+			expectedFile: "metrics_expected.yaml",
+			config:       Config{},
+		},
+		{
+			name:         "config_with_exclude_and_add",
+			inputFile:    "metrics_input.yaml",
+			expectedFile: "metrics_config_expected.yaml",
+			config: Config{
+				ExcludeAttributeKeys: []string{"db.system"},
+				AddAttributes: []AttributeExtractorAttribute{
+					{Key: "environment", Value: "testing"},
+				},
+			},
+		},
+	}
 
-	metricsSink := new(consumertest.MetricsSink)
-	conn, err := newConnector(zap.NewNop(), &Config{})
-	require.NoError(t, err)
-	conn.metricsConsumer = metricsSink
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			inputMetrics, err := golden.ReadMetrics(filepath.Join("testdata", tt.inputFile))
+			require.NoError(t, err)
+			expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", tt.expectedFile))
+			require.NoError(t, err)
 
-	err = conn.ConsumeMetrics(context.Background(), inputMetrics)
-	require.NoError(t, err)
+			metricsSink := new(consumertest.MetricsSink)
+			conn, err := newConnector(zap.NewNop(), &tt.config)
+			require.NoError(t, err)
+			conn.metricsConsumer = metricsSink
 
-	actualMetrics := metricsSink.AllMetrics()
-	require.Len(t, actualMetrics, 1)
+			err = conn.ConsumeMetrics(context.Background(), inputMetrics)
+			require.NoError(t, err)
 
-	require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics[0],
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-	))
+			actualMetrics := metricsSink.AllMetrics()
+			require.Len(t, actualMetrics, 1)
+
+			require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics[0],
+				pmetrictest.IgnoreTimestamp(),
+				pmetrictest.IgnoreMetricDataPointsOrder(),
+				pmetrictest.IgnoreResourceMetricsOrder(),
+				pmetrictest.IgnoreScopeMetricsOrder(),
+			))
+		})
+	}
 }
 
 func TestMaskString(t *testing.T) {

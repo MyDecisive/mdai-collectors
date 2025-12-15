@@ -8,10 +8,12 @@ resourceMetrics:
               dataPoints:
                 - asInt: "1"
                   attributes:
+                    - key: environment
+                      value:
+                        stringValue: "testing"
                     - key: data_type
                       value:
                         stringValue: "traces"
-                    # service_name omitted intentionally
                     - key: scope
                       value:
                         stringValue: "resource"
@@ -23,6 +25,7 @@ resourceMetrics:
                         stringValue: "str(Xxxxxxxxxx)"
               aggregationTemporality: 2
               isMonotonic: true
+
       - scope:
           name: "span"
         metrics:
@@ -31,28 +34,10 @@ resourceMetrics:
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    - key: data_type
+                    # NEW: Added Attribute from Config
+                    - key: environment
                       value:
-                        stringValue: "traces"
-                    - key: scope
-                      value:
-                        stringValue: "span"
-                    - key: name
-                      value:
-                        stringValue: "http.method"
-                    - key: type
-                      value:
-                        stringValue: "str(XXX)"
-              aggregationTemporality: 2
-              isMonotonic: true
-      - scope:
-          name: "span"
-        metrics:
-          - name: attr_extract_encounter_total
-            sum:
-              dataPoints:
-                - asInt: "1"
-                  attributes:
+                        stringValue: "testing"
                     - key: data_type
                       value:
                         stringValue: "traces"

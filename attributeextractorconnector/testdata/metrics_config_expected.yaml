@@ -1,0 +1,30 @@
+resourceMetrics:
+  - scopeMetrics:
+      - scope:
+          name: "scope"
+        metrics:
+          - name: attr_extract_encounter_total
+            sum:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: environment
+                      value:
+                        stringValue: "testing"
+                    - key: data_type
+                      value:
+                        stringValue: "metrics"
+                    - key: service_name
+                      value:
+                        stringValue: "database-service"
+                    - key: scope
+                      value:
+                        stringValue: "scope"
+                    - key: name
+                      value:
+                        stringValue: "exporter.name"
+                    - key: type
+                      value:
+                        stringValue: "str(xxxx)"
+              aggregationTemporality: 2
+              isMonotonic: true
