@@ -1,69 +1,132 @@
 resourceMetrics:
-  - scopeMetrics:
-      - scope:
-          name: "resource"
-        metrics:
-          - name: attr_extract_encounter_total
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - name: attr_extract_encounter_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
                     - key: data_type
                       value:
-                        stringValue: "traces"
-                    # service_name omitted intentionally
-                    - key: scope
-                      value:
-                        stringValue: "resource"
+                        stringValue: traces
                     - key: name
                       value:
-                        stringValue: "deployment.environment"
+                        stringValue: deployment.environment
+                    - key: scope
+                      value:
+                        stringValue: resource
                     - key: type
                       value:
-                        stringValue: "str(Xxxxxxxxxx)"
-              aggregationTemporality: 2
+                        stringValue: str(Xxxxxxxxxx)
+                  timeUnixNano: "1000000"
               isMonotonic: true
-      - scope:
-          name: "span"
-        metrics:
-          - name: attr_extract_encounter_total
+          - name: attr_extract_unique_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
                     - key: data_type
                       value:
-                        stringValue: "traces"
-                    - key: scope
-                      value:
-                        stringValue: "span"
+                        stringValue: traces
                     - key: name
                       value:
-                        stringValue: "http.method"
+                        stringValue: deployment.environment
+                    - key: scope
+                      value:
+                        stringValue: resource
                     - key: type
                       value:
-                        stringValue: "str(XXX)"
-              aggregationTemporality: 2
+                        stringValue: str(Xxxxxxxxxx)
+                  timeUnixNano: "1000000"
               isMonotonic: true
-      - scope:
-          name: "span"
-        metrics:
-          - name: attr_extract_encounter_total
+        scope:
+          name: resource
+      - metrics:
+          - name: attr_extract_encounter_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
                     - key: data_type
                       value:
-                        stringValue: "traces"
-                    - key: scope
-                      value:
-                        stringValue: "span"
+                        stringValue: traces
                     - key: name
                       value:
-                        stringValue: "retry_count"
+                        stringValue: http.method
+                    - key: scope
+                      value:
+                        stringValue: span
                     - key: type
                       value:
-                        stringValue: "int"
-              aggregationTemporality: 2
+                        stringValue: str(XXX)
+                  timeUnixNano: "1000000"
               isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: traces
+                    - key: name
+                      value:
+                        stringValue: http.method
+                    - key: scope
+                      value:
+                        stringValue: span
+                    - key: type
+                      value:
+                        stringValue: str(XXX)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: span
+      - metrics:
+          - name: attr_extract_encounter_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: traces
+                    - key: name
+                      value:
+                        stringValue: retry_count
+                    - key: scope
+                      value:
+                        stringValue: span
+                    - key: type
+                      value:
+                        stringValue: int
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: traces
+                    - key: name
+                      value:
+                        stringValue: retry_count
+                    - key: scope
+                      value:
+                        stringValue: span
+                    - key: type
+                      value:
+                        stringValue: int
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: span

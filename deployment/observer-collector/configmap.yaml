@@ -70,5 +70,5 @@ data:
           exporters: [otlphttp/prom]
         metrics/attrextract:
           receivers: [attributeextractor]
-          processors: [deltatocumulative]
+          processors: []
           exporters: [prometheus,debug]

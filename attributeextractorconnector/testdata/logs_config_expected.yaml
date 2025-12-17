@@ -1,117 +1,223 @@
 resourceMetrics:
-  - scopeMetrics:
-      - scope:
-          name: "logRecord"
-        metrics:
-          - name: attr_extract_encounter_total
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - name: attr_extract_encounter_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    - key: environment
-                      value:
-                        stringValue: "testing"
                     - key: data_type
                       value:
-                        stringValue: "logs"
-                    - key: service_name
+                        stringValue: logs
+                    - key: environment
                       value:
-                        stringValue: "payment-service"
-                    - key: scope
-                      value:
-                        stringValue: "logRecord"
+                        stringValue: testing
                     - key: name
                       value:
-                        stringValue: "http.status_code"
+                        stringValue: http.status_code
+                    - key: scope
+                      value:
+                        stringValue: logRecord
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
                     - key: type
                       value:
-                        stringValue: "int"
-              aggregationTemporality: 2
+                        stringValue: int
+                  timeUnixNano: "1000000"
               isMonotonic: true
-
-      - scope:
-          name: "logRecord"
-        metrics:
-          - name: attr_extract_encounter_total
+          - name: attr_extract_unique_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    - key: environment
-                      value:
-                        stringValue: "testing"
                     - key: data_type
                       value:
-                        stringValue: "logs"
-                    - key: service_name
+                        stringValue: logs
+                    - key: environment
                       value:
-                        stringValue: "payment-service"
-                    - key: scope
-                      value:
-                        stringValue: "logRecord"
+                        stringValue: testing
                     - key: name
                       value:
-                        stringValue: "user.id"
+                        stringValue: http.status_code
+                    - key: scope
+                      value:
+                        stringValue: logRecord
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
                     - key: type
                       value:
-                        stringValue: "str(Xxxx111)"
-              aggregationTemporality: 2
+                        stringValue: int
+                  timeUnixNano: "1000000"
               isMonotonic: true
-
-      - scope:
-          name: "resource"
-        metrics:
-          - name: attr_extract_encounter_total
+        scope:
+          name: logRecord
+      - metrics:
+          - name: attr_extract_encounter_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    - key: environment
-                      value:
-                        stringValue: "testing"
                     - key: data_type
                       value:
-                        stringValue: "logs"
-                    - key: service_name
+                        stringValue: logs
+                    - key: environment
                       value:
-                        stringValue: "payment-service"
-                    - key: scope
-                      value:
-                        stringValue: "resource"
+                        stringValue: testing
                     - key: name
                       value:
-                        stringValue: "cloud.region"
+                        stringValue: user.id
+                    - key: scope
+                      value:
+                        stringValue: logRecord
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
                     - key: type
                       value:
-                        stringValue: "str(xx-xxxx-1)"
-              aggregationTemporality: 2
+                        stringValue: str(Xxxx111)
+                  timeUnixNano: "1000000"
               isMonotonic: true
-
-      - scope:
-          name: "scope"
-        metrics:
-          - name: attr_extract_encounter_total
+          - name: attr_extract_unique_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    - key: environment
-                      value:
-                        stringValue: "testing"
                     - key: data_type
                       value:
-                        stringValue: "logs"
-                    - key: service_name
+                        stringValue: logs
+                    - key: environment
                       value:
-                        stringValue: "payment-service"
-                    - key: scope
-                      value:
-                        stringValue: "scope"
+                        stringValue: testing
                     - key: name
                       value:
-                        stringValue: "scope.attr"
+                        stringValue: user.id
+                    - key: scope
+                      value:
+                        stringValue: logRecord
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
                     - key: type
                       value:
-                        stringValue: "str(XxxxxXxx)"
-              aggregationTemporality: 2
+                        stringValue: str(Xxxx111)
+                  timeUnixNano: "1000000"
               isMonotonic: true
+        scope:
+          name: logRecord
+      - metrics:
+          - name: attr_extract_encounter_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: logs
+                    - key: environment
+                      value:
+                        stringValue: testing
+                    - key: name
+                      value:
+                        stringValue: cloud.region
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
+                    - key: type
+                      value:
+                        stringValue: str(xx-xxxx-1)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: logs
+                    - key: environment
+                      value:
+                        stringValue: testing
+                    - key: name
+                      value:
+                        stringValue: cloud.region
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
+                    - key: type
+                      value:
+                        stringValue: str(xx-xxxx-1)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: resource
+      - metrics:
+          - name: attr_extract_encounter_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: logs
+                    - key: environment
+                      value:
+                        stringValue: testing
+                    - key: name
+                      value:
+                        stringValue: scope.attr
+                    - key: scope
+                      value:
+                        stringValue: scope
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
+                    - key: type
+                      value:
+                        stringValue: str(XxxxxXxx)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: logs
+                    - key: environment
+                      value:
+                        stringValue: testing
+                    - key: name
+                      value:
+                        stringValue: scope.attr
+                    - key: scope
+                      value:
+                        stringValue: scope
+                    - key: service_name
+                      value:
+                        stringValue: payment-service
+                    - key: type
+                      value:
+                        stringValue: str(XxxxxXxx)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: scope

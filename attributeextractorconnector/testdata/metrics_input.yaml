@@ -7,6 +7,9 @@ resourceMetrics:
         - key: db.system
           value:
             stringValue: "postgresql"
+        - key: db.arch
+          value:
+            stringValue: "z80"
     scopeMetrics:
       - scope:
           name: "otel.collector"

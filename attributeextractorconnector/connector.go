@@ -3,6 +3,15 @@ package attributeextractorconnector
 import (
 	"context"
 	"fmt"
+	"hash/fnv"
+	"slices"
+	"sort"
+	"strings"
+	"sync"
+	"time"
+	"unicode"
+
+	"github.com/axiomhq/hyperloglog"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -10,12 +19,12 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
-	"slices"
-	"sort"
-	"strings"
-	"time"
-	"unicode"
 )
+
+type attributeState struct {
+	sketch     *hyperloglog.Sketch
+	totalCount int64
+}
 
 type connectorImp struct {
 	config          Config
@@ -23,6 +32,11 @@ type connectorImp struct {
 	logger          *zap.Logger
 	component.StartFunc
 	component.ShutdownFunc
+
+	// Key: Service|Scope|Name|TypeMask
+	// Value: Combined state (HLL + Counter)
+	stateRegistry map[string]*attributeState
+	registryMu    sync.RWMutex
 }
 
 const (
@@ -44,7 +58,9 @@ const (
 	nameAttributeKey              = "name"
 	attrTypeAttribueKey           = "type"
 	serviceNameOutputAttributeKey = "service_name"
-	attributeExtractMetricName    = "attr_extract_encounter_total"
+
+	metricNameTotalHits = "attr_extract_encounter_count"
+	metricNameUnique    = "attr_extract_unique_count"
 
 	uppercaseMaskChar = 'X'
 	lowercaseMaskChar = 'x'
@@ -64,8 +80,9 @@ func newConnector(logger *zap.Logger, config component.Config) (*connectorImp, e
 	cfg := config.(*Config)
 
 	return &connectorImp{
-		config: *cfg,
-		logger: logger,
+		config:        *cfg,
+		logger:        logger,
+		stateRegistry: make(map[string]*attributeState),
 	}, nil
 }
 
@@ -76,8 +93,10 @@ func (c *connectorImp) Capabilities() consumer.Capabilities {
 func (c *connectorImp) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
 	outputMetrics := pmetric.NewMetrics()
 	timestamp := pcommon.NewTimestampFromTime(time.Now())
-	attributeMaskMap := c.extractMetricInfoesFromLogs(logs)
-	err := c.createOutputMetrics(outputMetrics, attributeMaskMap, dataTypeLogsAttributeValue, timestamp)
+
+	touchedKeys := c.updateRegistryFromLogs(logs)
+
+	err := c.createOutputMetrics(outputMetrics, touchedKeys, dataTypeLogsAttributeValue, timestamp)
 	if err != nil {
 		return err
 	}
@@ -87,8 +106,10 @@ func (c *connectorImp) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
 func (c *connectorImp) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
 	outputMetrics := pmetric.NewMetrics()
 	timestamp := pcommon.NewTimestampFromTime(time.Now())
-	attributeMaskMap := c.extractMetricInfoesFromTraces(traces)
-	err := c.createOutputMetrics(outputMetrics, attributeMaskMap, dataTypeTracesAttributeValue, timestamp)
+
+	touchedKeys := c.updateRegistryFromTraces(traces)
+
+	err := c.createOutputMetrics(outputMetrics, touchedKeys, dataTypeTracesAttributeValue, timestamp)
 	if err != nil {
 		return err
 	}
@@ -99,8 +120,10 @@ func (c *connectorImp) ConsumeTraces(ctx context.Context, traces ptrace.Traces) 
 func (c *connectorImp) ConsumeMetrics(ctx context.Context, metrics pmetric.Metrics) error {
 	outputMetrics := pmetric.NewMetrics()
 	timestamp := pcommon.NewTimestampFromTime(time.Now())
-	attributeMaskMap := c.extractMetricInfoesFromMetrics(metrics)
-	err := c.createOutputMetrics(outputMetrics, attributeMaskMap, dataTypeMetricsAttributeValue, timestamp)
+
+	touchedKeys := c.updateRegistryFromMetrics(metrics)
+
+	err := c.createOutputMetrics(outputMetrics, touchedKeys, dataTypeMetricsAttributeValue, timestamp)
 	if err != nil {
 		return err
 	}
@@ -108,8 +131,8 @@ func (c *connectorImp) ConsumeMetrics(ctx context.Context, metrics pmetric.Metri
 	return c.metricsConsumer.ConsumeMetrics(ctx, outputMetrics)
 }
 
-func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]int64 {
-	attributeMaskMap := make(map[string]int64)
+func (c *connectorImp) updateRegistryFromLogs(logs plog.Logs) map[string]struct{} {
+	touchedKeys := make(map[string]struct{})
 
 	for _, resourceLog := range logs.ResourceLogs().All() {
 		resourceAttrs := resourceLog.Resource().Attributes()
@@ -117,46 +140,34 @@ func (c *connectorImp) extractMetricInfoesFromLogs(logs plog.Logs) map[string]in
 		if serviceNameAttr, serviceAttrExists := resourceAttrs.Get(serviceNameAttribute); serviceAttrExists {
 			serviceName = serviceNameAttr.Str()
 		}
-		for key, value := range resourceAttrs.All() {
-			if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
-				continue
-			}
-			maskMapKey := getAttributeMapKey(pdatumResourceScope, serviceName, value, key)
-			if _, ok := attributeMaskMap[maskMapKey]; !ok {
-				attributeMaskMap[maskMapKey] = 1
-			} else {
-				attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
+
+		processAttributes := func(scope string, attrs pcommon.Map) {
+			for key, value := range attrs.All() {
+				if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
+					continue
+				}
+				maskMapKey := getAttributeMapKey(scope, serviceName, value, key)
+				valHash := hashPcommonValue(value)
+
+				c.trackValue(maskMapKey, valHash)
+				touchedKeys[maskMapKey] = struct{}{}
 			}
 		}
+
+		processAttributes(pdatumResourceScope, resourceAttrs)
+
 		for _, scopeLog := range resourceLog.ScopeLogs().All() {
-			for key, value := range scopeLog.Scope().Attributes().All() {
-				maskMapKey := getAttributeMapKey(pdatumScopeScope, serviceName, value, key)
-				if _, ok := attributeMaskMap[maskMapKey]; !ok {
-					attributeMaskMap[maskMapKey] = 1
-				} else {
-					attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-				}
-			}
+			processAttributes(pdatumScopeScope, scopeLog.Scope().Attributes())
 			for _, logRecord := range scopeLog.LogRecords().All() {
-				for key, value := range logRecord.Attributes().All() {
-					if slices.Contains(c.config.ExcludeAttributeKeys, key) {
-						continue
-					}
-					maskMapKey := getAttributeMapKey(logRecordScope, serviceName, value, key)
-					if _, ok := attributeMaskMap[maskMapKey]; !ok {
-						attributeMaskMap[maskMapKey] = 1
-					} else {
-						attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-					}
-				}
+				processAttributes(logRecordScope, logRecord.Attributes())
 			}
 		}
 	}
-	return attributeMaskMap
+	return touchedKeys
 }
 
-func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) map[string]int64 {
-	attributeMaskMap := make(map[string]int64)
+func (c *connectorImp) updateRegistryFromMetrics(metrics pmetric.Metrics) map[string]struct{} {
+	touchedKeys := make(map[string]struct{})
 
 	for _, resourceMetric := range metrics.ResourceMetrics().All() {
 		resourceAttrs := resourceMetric.Resource().Attributes()
@@ -164,49 +175,26 @@ func (c *connectorImp) extractMetricInfoesFromMetrics(metrics pmetric.Metrics) m
 		if serviceNameAttr, serviceAttrExists := resourceAttrs.Get(serviceNameAttribute); serviceAttrExists {
 			serviceName = serviceNameAttr.Str()
 		}
-		for key, value := range resourceAttrs.All() {
-			if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
-				continue
-			}
-			maskMapKey := getAttributeMapKey(pdatumResourceScope, serviceName, value, key)
-			if _, ok := attributeMaskMap[maskMapKey]; !ok {
-				attributeMaskMap[maskMapKey] = 1
-			} else {
-				attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-			}
-		}
-		for _, scopeMetric := range resourceMetric.ScopeMetrics().All() {
-			for key, value := range scopeMetric.Scope().Attributes().All() {
-				if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+
+		processAttributes := func(scope string, attrs pcommon.Map) {
+			for key, value := range attrs.All() {
+				if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
 					continue
 				}
-				maskMapKey := getAttributeMapKey(pdatumScopeScope, serviceName, value, key)
-				if _, ok := attributeMaskMap[maskMapKey]; !ok {
-					attributeMaskMap[maskMapKey] = 1
-				} else {
-					attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-				}
-			}
-			for _, metric := range scopeMetric.Metrics().All() {
-				for key, value := range metric.Metadata().All() {
-					if slices.Contains(c.config.ExcludeAttributeKeys, key) {
-						continue
-					}
-					maskMapKey := getAttributeMapKey(metricMetadataScope, serviceName, value, key)
-					if _, ok := attributeMaskMap[maskMapKey]; !ok {
-						attributeMaskMap[maskMapKey] = 1
-					} else {
-						attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-					}
-				}
+				maskMapKey := getAttributeMapKey(scope, serviceName, value, key)
+				valHash := hashPcommonValue(value)
+				c.trackValue(maskMapKey, valHash)
+				touchedKeys[maskMapKey] = struct{}{}
 			}
 		}
+
+		processAttributes(pdatumResourceScope, resourceAttrs)
 	}
-	return attributeMaskMap
+	return touchedKeys
 }
 
-func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[string]int64 {
-	attributeMaskMap := make(map[string]int64)
+func (c *connectorImp) updateRegistryFromTraces(traces ptrace.Traces) map[string]struct{} {
+	touchedKeys := make(map[string]struct{})
 
 	for _, resourceSpan := range traces.ResourceSpans().All() {
 		resourceAttrs := resourceSpan.Resource().Attributes()
@@ -214,61 +202,85 @@ func (c *connectorImp) extractMetricInfoesFromTraces(traces ptrace.Traces) map[s
 		if serviceNameAttr, serviceAttrExists := resourceAttrs.Get(serviceNameAttribute); serviceAttrExists {
 			serviceName = serviceNameAttr.Str()
 		}
-		for key, value := range resourceAttrs.All() {
-			if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
-				continue
-			}
-			maskMapKey := getAttributeMapKey(pdatumResourceScope, serviceName, value, key)
-			if _, ok := attributeMaskMap[maskMapKey]; !ok {
-				attributeMaskMap[maskMapKey] = 1
-			} else {
-				attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-			}
-		}
-		for _, scopeSpan := range resourceSpan.ScopeSpans().All() {
-			for key, value := range scopeSpan.Scope().Attributes().All() {
-				if slices.Contains(c.config.ExcludeAttributeKeys, key) {
+
+		processAttributes := func(scope string, attrs pcommon.Map) {
+			for key, value := range attrs.All() {
+				if key == serviceNameAttribute || slices.Contains(c.config.ExcludeAttributeKeys, key) {
 					continue
 				}
-				maskMapKey := getAttributeMapKey(pdatumScopeScope, serviceName, value, key)
-				if _, ok := attributeMaskMap[maskMapKey]; !ok {
-					attributeMaskMap[maskMapKey] = 1
-				} else {
-					attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-				}
+				maskMapKey := getAttributeMapKey(scope, serviceName, value, key)
+				valHash := hashPcommonValue(value)
+				c.trackValue(maskMapKey, valHash)
+				touchedKeys[maskMapKey] = struct{}{}
 			}
+		}
+
+		processAttributes(pdatumResourceScope, resourceAttrs)
+
+		for _, scopeSpan := range resourceSpan.ScopeSpans().All() {
+			processAttributes(pdatumScopeScope, scopeSpan.Scope().Attributes())
 			for _, span := range scopeSpan.Spans().All() {
-				for key, value := range span.Attributes().All() {
-					if slices.Contains(c.config.ExcludeAttributeKeys, key) {
-						continue
-					}
-					maskMapKey := getAttributeMapKey(spanScope, serviceName, value, key)
-					if _, ok := attributeMaskMap[maskMapKey]; !ok {
-						attributeMaskMap[maskMapKey] = 1
-					} else {
-						attributeMaskMap[maskMapKey] = attributeMaskMap[maskMapKey] + 1
-					}
-				}
+				processAttributes(spanScope, span.Attributes())
 			}
 		}
 	}
-	return attributeMaskMap
+	return touchedKeys
 }
 
-func (c *connectorImp) createOutputMetrics(outputMetrics pmetric.Metrics, attributeMaskMap map[string]int64, dataType string, timestamp pcommon.Timestamp) error {
+// trackValue updates both the total count and the HLL sketch for a given key
+func (c *connectorImp) trackValue(key string, hash uint64) {
+	c.registryMu.Lock()
+	defer c.registryMu.Unlock()
+
+	state, exists := c.stateRegistry[key]
+	if !exists {
+		state = &attributeState{
+			sketch:     hyperloglog.New(),
+			totalCount: 0,
+		}
+		c.stateRegistry[key] = state
+	}
+
+	// 1. Always increment total encounters
+	state.totalCount++
+
+	// 2. Add to HLL for uniqueness tracking
+	state.sketch.InsertHash(hash)
+}
+
+func (c *connectorImp) createOutputMetrics(outputMetrics pmetric.Metrics, touchedKeys map[string]struct{}, dataType string, timestamp pcommon.Timestamp) error {
 	outputResourceMetrics := outputMetrics.ResourceMetrics().AppendEmpty()
 
-	keys := make([]string, 0, len(attributeMaskMap))
-	for k := range attributeMaskMap {
+	keys := make([]string, 0, len(touchedKeys))
+	for k := range touchedKeys {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
 	for _, key := range keys {
-		value := attributeMaskMap[key]
+		// Read Global State
+		c.registryMu.RLock()
+		state, exists := c.stateRegistry[key]
+		var totalHits int64
+		var uniqueEstimate int64
+		if exists {
+			totalHits = state.totalCount
+			uniqueEstimate = int64(state.sketch.Estimate())
+		}
+		c.registryMu.RUnlock()
+
+		if !exists {
+			continue
+		}
+
 		outputScopeMetric := outputResourceMetrics.ScopeMetrics().AppendEmpty()
 		splitKey := strings.Split(key, mapSeparator)
+		if len(splitKey) < 4 {
+			continue
+		}
+
 		outputScopeMetric.Scope().SetName(splitKey[1])
+
 		rawAttributes := map[string]any{
 			dataTypeAttributeKey: dataType,
 			scopeAttributeKey:    splitKey[1],
@@ -281,7 +293,15 @@ func (c *connectorImp) createOutputMetrics(outputMetrics pmetric.Metrics, attrib
 		for _, addingAttribute := range c.config.AddAttributes {
 			rawAttributes[addingAttribute.Key] = addingAttribute.Value
 		}
-		err := c.addOutputMetricToScopeMetrics(outputScopeMetric, attributeExtractMetricName, timestamp, value, rawAttributes)
+
+		// Emit Metric 1: Total Hits (Counter)
+		err := c.addOutputMetricToScopeMetrics(outputScopeMetric, metricNameTotalHits, timestamp, totalHits, rawAttributes)
+		if err != nil {
+			return err
+		}
+
+		// Emit Metric 2: Unique Count (Gauge/Counter - HLL Estimate)
+		err = c.addOutputMetricToScopeMetrics(outputScopeMetric, metricNameUnique, timestamp, uniqueEstimate, rawAttributes)
 		if err != nil {
 			return err
 		}
@@ -318,9 +338,7 @@ func getAttributeMapKey(attrScope string, attrServiceName string, value pcommon.
 		typeStr = unknownAttrValueType
 	}
 
-	maskMapKey := serviceName + mapSeparator + attrScope + mapSeparator + attrKey + mapSeparator + typeStr
-
-	return maskMapKey
+	return serviceName + mapSeparator + attrScope + mapSeparator + attrKey + mapSeparator + typeStr
 }
 
 func (c *connectorImp) addOutputMetricToScopeMetrics(scopeMetric pmetric.ScopeMetrics, metricName string, timestamp pcommon.Timestamp, value int64, rawAttributes map[string]any) error {
@@ -329,13 +347,15 @@ func (c *connectorImp) addOutputMetricToScopeMetrics(scopeMetric pmetric.ScopeMe
 	sum := metric.SetEmptySum()
 	sum.SetIsMonotonic(true)
 	sum.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+
 	dataPoints := sum.DataPoints()
 	dataPoint := dataPoints.AppendEmpty()
 	dataPoint.SetTimestamp(timestamp)
 	dataPoint.SetIntValue(value)
+
 	err := dataPoint.Attributes().FromRaw(rawAttributes)
 	if err != nil {
-		c.logger.Error("Error adding attributes to datavolume metrics for logs measurement", zap.Error(err))
+		c.logger.Error("Error adding attributes to metrics", zap.Error(err))
 		return err
 	}
 	return nil
@@ -344,7 +364,6 @@ func (c *connectorImp) addOutputMetricToScopeMetrics(scopeMetric pmetric.ScopeMe
 func maskString(input string) string {
 	var builder strings.Builder
 	builder.Grow(len(input))
-
 	for _, r := range input {
 		switch {
 		case unicode.IsUpper(r):
@@ -357,6 +376,28 @@ func maskString(input string) string {
 			builder.WriteRune(r)
 		}
 	}
-
 	return builder.String()
+}
+
+func hashPcommonValue(v pcommon.Value) uint64 {
+	h := fnv.New64a()
+	switch v.Type() {
+	case pcommon.ValueTypeStr:
+		h.Write([]byte(v.Str()))
+	case pcommon.ValueTypeInt:
+		fmt.Fprintf(h, "%d", v.Int())
+	case pcommon.ValueTypeDouble:
+		fmt.Fprintf(h, "%f", v.Double())
+	case pcommon.ValueTypeBool:
+		if v.Bool() {
+			h.Write([]byte("true"))
+		} else {
+			h.Write([]byte("false"))
+		}
+	case pcommon.ValueTypeBytes:
+		h.Write(v.Bytes().AsRaw())
+	default:
+		fmt.Fprintf(h, "%v", v.AsRaw())
+	}
+	return h.Sum64()
 }

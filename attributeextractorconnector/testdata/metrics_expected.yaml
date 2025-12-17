@@ -1,55 +1,101 @@
 resourceMetrics:
-  - scopeMetrics:
-      # Resource Attribute: db.system
-      - scope:
-          name: "resource"
-        metrics:
-        - name: attr_extract_encounter_total
-          sum:
-            dataPoints:
-              - asInt: "1"
-                attributes:
-                  - key: data_type
-                    value:
-                      stringValue: "metrics"
-                  - key: service_name
-                    value:
-                      stringValue: "database-service"
-                  - key: scope
-                    value:
-                      stringValue: "resource"
-                  - key: name
-                    value:
-                      stringValue: "db.system"
-                  - key: type
-                    value:
-                      stringValue: "str(xxxxxxxxxx)"
-            aggregationTemporality: 2
-            isMonotonic: true
-
-      # Scope Attribute: exporter.name
-      - scope:
-          name: "scope"
-        metrics:
-          - name: attr_extract_encounter_total
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - name: attr_extract_encounter_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
                     - key: data_type
                       value:
-                        stringValue: "metrics"
-                    - key: service_name
-                      value:
-                        stringValue: "database-service"
-                    - key: scope
-                      value:
-                        stringValue: "scope"
+                        stringValue: metrics
                     - key: name
                       value:
-                        stringValue: "exporter.name"
+                        stringValue: db.arch
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: service_name
+                      value:
+                        stringValue: database-service
                     - key: type
                       value:
-                        stringValue: "str(xxxx)"
-              aggregationTemporality: 2
+                        stringValue: str(x11)
+                  timeUnixNano: "1000000"
               isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: metrics
+                    - key: name
+                      value:
+                        stringValue: db.arch
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: service_name
+                      value:
+                        stringValue: database-service
+                    - key: type
+                      value:
+                        stringValue: str(x11)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: resource
+      - metrics:
+          - name: attr_extract_encounter_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: metrics
+                    - key: name
+                      value:
+                        stringValue: db.system
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: service_name
+                      value:
+                        stringValue: database-service
+                    - key: type
+                      value:
+                        stringValue: str(xxxxxxxxxx)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: metrics
+                    - key: name
+                      value:
+                        stringValue: db.system
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: service_name
+                      value:
+                        stringValue: database-service
+                    - key: type
+                      value:
+                        stringValue: str(xxxxxxxxxx)
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: resource

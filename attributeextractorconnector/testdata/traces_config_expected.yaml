@@ -1,54 +1,101 @@
 resourceMetrics:
-  - scopeMetrics:
-      - scope:
-          name: "resource"
-        metrics:
-          - name: attr_extract_encounter_total
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - name: attr_extract_encounter_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    - key: environment
-                      value:
-                        stringValue: "testing"
                     - key: data_type
                       value:
-                        stringValue: "traces"
-                    - key: scope
+                        stringValue: traces
+                    - key: environment
                       value:
-                        stringValue: "resource"
+                        stringValue: testing
                     - key: name
                       value:
-                        stringValue: "deployment.environment"
+                        stringValue: deployment.environment
+                    - key: scope
+                      value:
+                        stringValue: resource
                     - key: type
                       value:
-                        stringValue: "str(Xxxxxxxxxx)"
-              aggregationTemporality: 2
+                        stringValue: str(Xxxxxxxxxx)
+                  timeUnixNano: "1000000"
               isMonotonic: true
-
-      - scope:
-          name: "span"
-        metrics:
-          - name: attr_extract_encounter_total
+          - name: attr_extract_unique_count
             sum:
+              aggregationTemporality: 2
               dataPoints:
                 - asInt: "1"
                   attributes:
-                    # NEW: Added Attribute from Config
-                    - key: environment
-                      value:
-                        stringValue: "testing"
                     - key: data_type
                       value:
-                        stringValue: "traces"
-                    - key: scope
+                        stringValue: traces
+                    - key: environment
                       value:
-                        stringValue: "span"
+                        stringValue: testing
                     - key: name
                       value:
-                        stringValue: "retry_count"
+                        stringValue: deployment.environment
+                    - key: scope
+                      value:
+                        stringValue: resource
                     - key: type
                       value:
-                        stringValue: "int"
-              aggregationTemporality: 2
+                        stringValue: str(Xxxxxxxxxx)
+                  timeUnixNano: "1000000"
               isMonotonic: true
+        scope:
+          name: resource
+      - metrics:
+          - name: attr_extract_encounter_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: traces
+                    - key: environment
+                      value:
+                        stringValue: testing
+                    - key: name
+                      value:
+                        stringValue: retry_count
+                    - key: scope
+                      value:
+                        stringValue: span
+                    - key: type
+                      value:
+                        stringValue: int
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: attr_extract_unique_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: data_type
+                      value:
+                        stringValue: traces
+                    - key: environment
+                      value:
+                        stringValue: testing
+                    - key: name
+                      value:
+                        stringValue: retry_count
+                    - key: scope
+                      value:
+                        stringValue: span
+                    - key: type
+                      value:
+                        stringValue: int
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope:
+          name: span
