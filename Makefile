@@ -9,25 +9,29 @@ endif
 OBSERVER_VERSION ?= 0.1.5
 MDAICOL_VERSION ?= 0.1.6
 MDAI_DD_COL_VERSION ?= 0.1.0
+MDAI_DATA_FILTRATION_VERSION ?= 0.1.0
 
 # Default image registry
 REGISTRY ?= public.ecr.aws/decisiveai
 
 # Supported components and their config/dockerfile
-COLLECTORS := observer-collector mdai-collector mdai-datadog-collector
+COLLECTORS := observer-collector mdai-collector mdai-datadog-collector mdai-data-filtration-collector
 
 # Map components to config paths and Dockerfiles
 CONFIG_observer-collector = config/observer-collector/observer-collector-builder.yaml
 CONFIG_mdai-collector = config/mdai-collector/mdai-collector-builder.yaml
 CONFIG_mdai-datadog-collector = config/mdai-datadog-collector/mdai-datadog-collector-builder.yaml
+CONFIG_mdai-data-filtration-collector = config/mdai-data-filtration-collector/mdai-data-filtration-collector-builder.yaml
 
-DOCKERFILE_observer-collector = Dockerfile
-DOCKERFILE_mdai-collector = mdai-collector.Dockerfile
-DOCKERFILE_mdai-datadog-collector = mdai-datadog-collector.Dockerfile
+DOCKERFILE_observer-collector = docker/Dockerfile
+DOCKERFILE_mdai-collector = docker/mdai-collector.Dockerfile
+DOCKERFILE_mdai-datadog-collector = docker/mdai-datadog-collector.Dockerfile
+DOCKERFILE_mdai-data-filtration-collector = docker/mdai-data-filtration-collector.Dockerfile
 
 VERSION_observer-collector = $(OBSERVER_VERSION)
 VERSION_mdai-collector = $(MDAICOL_VERSION)
 VERSION_mdai-datadog-collector = $(MDAI_DD_COL_VERSION)
+VERSION_mdai-data-filtration-collector = $(MDAI_DATA_FILTRATION_VERSION)
 
 # Resolve values dynamically based on component
 CONFIG := $(CONFIG_$(COLLECTOR))
