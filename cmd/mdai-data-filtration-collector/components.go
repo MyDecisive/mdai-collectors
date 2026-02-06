@@ -37,7 +37,7 @@ func components() (otelcol.Factories, error) {
 	}
 	factories.ExtensionModules = make(map[component.Type]string, len(factories.Extensions))
 	factories.ExtensionModules[healthcheckextension.NewFactory().Type()] = "github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.144.0"
-	factories.ExtensionModules[opampextension.NewFactory().Type()] = "github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension v0.144.0"
+	factories.ExtensionModules[opampextension.NewFactory().Type()] = "github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension v0.145.0"
 
 	factories.Receivers, err = otelcol.MakeFactoryMap[receiver.Factory](
 		otlpreceiver.NewFactory(),

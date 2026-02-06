@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/collector/confmap"
 	mdaiprovider "go.opentelemetry.io/collector/confmap/provider/mdaiprovider"
 	envprovider "go.opentelemetry.io/collector/confmap/provider/envprovider"
+	fileprovider "go.opentelemetry.io/collector/confmap/provider/fileprovider"
 	"go.opentelemetry.io/collector/otelcol"
 )
 
@@ -28,12 +29,14 @@ func main() {
 				ProviderFactories: []confmap.ProviderFactory{
 					mdaiprovider.NewFactory(),
 					envprovider.NewFactory(),
+					fileprovider.NewFactory(),
 				},
 			},
 		},
 		ProviderModules: map[string]string{
 			mdaiprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "go.opentelemetry.io/collector/confmap/provider/mdaiprovider v0.1.0",
 			envprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "go.opentelemetry.io/collector/confmap/provider/envprovider v1.48.0",
+			fileprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "go.opentelemetry.io/collector/confmap/provider/fileprovider v1.48.0",
     	},
 		ConverterModules: []string{
 		},
