@@ -13,6 +13,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} /app/builder --config=co
 FROM scratch
 ARG VARIANT
 COPY --from=builder app/cmd/observer-collector /
+COPY --from=builder app/config/observer-collector/observer-collector-config.yaml /
 EXPOSE 4317/tcp 4318/tcp 8891/tcp 8899/tcp 13133/tcp
 USER 65533:65533
-ENTRYPOINT ["/mdai-observer-collector"]
+ENTRYPOINT ["/mdai-observer-collector", "--config=observer-collector-config.yaml"]

@@ -2,6 +2,9 @@ package datavolumeconnector
 
 import (
 	"context"
+	"path/filepath"
+	"testing"
+
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/assert"
@@ -9,8 +12,6 @@ import (
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/connector/connectortest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"path/filepath"
-	"testing"
 )
 
 func TestLogsToMetrics(t *testing.T) {
@@ -87,7 +88,7 @@ func TestLogsToMetrics(t *testing.T) {
 			factory := NewFactory()
 			metricsSink := &consumertest.MetricsSink{}
 			conn, err := factory.CreateLogsToMetrics(context.Background(),
-				connectortest.NewNopSettings(), testCase.cfg, metricsSink)
+				connectortest.NewNopSettings(typeStr), testCase.cfg, metricsSink)
 			require.NoError(t, err)
 			require.NotNil(t, conn)
 			assert.False(t, conn.Capabilities().MutatesData)
@@ -140,7 +141,7 @@ func TestTracesToMetrics(t *testing.T) {
 			factory := NewFactory()
 			metricsSink := &consumertest.MetricsSink{}
 			conn, err := factory.CreateTracesToMetrics(context.Background(),
-				connectortest.NewNopSettings(), testCase.cfg, metricsSink)
+				connectortest.NewNopSettings(typeStr), testCase.cfg, metricsSink)
 			require.NoError(t, err)
 			require.NotNil(t, conn)
 			assert.False(t, conn.Capabilities().MutatesData)
@@ -193,7 +194,7 @@ func TestMetricsToMetrics(t *testing.T) {
 			factory := NewFactory()
 			metricsSink := &consumertest.MetricsSink{}
 			conn, err := factory.CreateMetricsToMetrics(context.Background(),
-				connectortest.NewNopSettings(), testCase.cfg, metricsSink)
+				connectortest.NewNopSettings(typeStr), testCase.cfg, metricsSink)
 			require.NoError(t, err)
 			require.NotNil(t, conn)
 			assert.False(t, conn.Capabilities().MutatesData)
