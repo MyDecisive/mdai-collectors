@@ -1,0 +1,103 @@
+receivers:
+  datadog:
+    endpoint: 0.0.0.0:8126
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        # Since this collector needs to receive data from the web, enable cors for all origins
+        # `allowed_origins` can be refined for your deployment domain
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
+
+extensions:
+  # The health_check extension is mandatory for this chart.
+  # Without the health_check extension the collector will fail the readiness and liveliness probes.
+  # The health_check extension can be modified, but should never be removed.
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+processors:
+  datadogsemantics: { }
+
+  memory_limiter:
+    check_interval: 23s
+    limit_percentage: 75
+    spike_limit_percentage: 15
+
+  batch:
+    send_batch_size: 5000
+    timeout: 300s
+
+  tail_sampling:
+    decision_wait: 10s
+    policies:
+      - name: keep-all-the-errors
+        type: and
+        and:
+          and_sub_policy:
+            - name: error-sampling
+              type: status_code
+              status_code:
+                status_codes:
+                  - ERROR
+      - name: probabilistic-sample-top-talkers
+        type: and
+        and:
+          and_sub_policy:
+            - name: services-using-tail-sampling
+              type: string_attribute
+              string_attribute:
+                key: operation
+                values:
+                  - "high-volume-op"
+            - name: probabilistic-policy
+              type: probabilistic
+              probabilistic:
+                sampling_percentage: 10  # sample 10%
+      - name: always-sample-non-top-talkers
+        type: ottl_condition
+        ottl_condition: {
+          error_mode: ignore,
+          span: [
+            "attributes[\"operation\"] != \"high-volume-op\"",
+          ]
+        }
+
+connectors:
+  datadog/connector:
+    traces:
+      trace_buffer: 1000  # default
+
+exporters:
+  debug: {}
+
+  datadog:
+    api:
+      site: ${env:DD_SITE}
+      key: ${env:DD_API_KEY}
+
+service:
+  extensions:
+    - health_check
+  pipelines:
+    logs:
+      receivers: [ datadog, otlp ]
+      processors: [ batch ]
+      exporters: [ datadog ]
+    traces:
+      receivers: [ datadog, otlp ]
+      processors: [ batch ]
+      exporters: [ datadog/connector ]
+    traces/dd:
+      receivers: [ datadog/connector ]
+      processors: [ tail_sampling, batch, datadogsemantics ]
+      exporters: [ debug, datadog ]
+    metrics:
+      receivers: [ datadog/connector ]
+      processors: [ batch ]
+      exporters: [ datadog ]
