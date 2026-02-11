@@ -25,11 +25,8 @@ extensions:
 
 providers:
   - gomod:
-      go.opentelemetry.io/collector/confmap/provider/mdaiprovider v0.1.0
+      github.com/mydecisive/mdaiprovider v0.2.0
   - gomod:
       go.opentelemetry.io/collector/confmap/provider/envprovider v1.48.0
   - gomod:
       go.opentelemetry.io/collector/confmap/provider/fileprovider v1.48.0
-
-replaces:
-  - go.opentelemetry.io/collector/confmap/provider/mdaiprovider => ../../mdaiprovider

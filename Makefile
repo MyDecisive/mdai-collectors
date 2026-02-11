@@ -5,6 +5,9 @@ else
 GOBIN := $(shell go env GOBIN)
 endif
 
+GOPRIVATE = github.com/mydecisive/mdaiprovider
+export GOPRIVATE
+
 # Default versions (can be overridden via CLI)
 OBSERVER_VERSION ?= 0.1.5
 MDAICOL_VERSION ?= 0.1.6
@@ -54,12 +57,14 @@ all: build
 
 .PHONY: build
 build:
+	git config --global url."ssh://git@github.com".insteadOf https://github.com
 	$(require-component)
 	@echo "🔨 Building $(COLLECTOR) from $(CONFIG)"
 	builder --config=$(CONFIG)
 
 .PHONY: docker-build
 docker-build:
+	# TODO: inject ssh key variable
 	$(require-component)
 	@echo "🐳 Building Docker image for $(COLLECTOR)"
 	docker buildx build \

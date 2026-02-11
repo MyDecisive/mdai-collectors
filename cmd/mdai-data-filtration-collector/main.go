@@ -8,7 +8,7 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
-	mdaiprovider "go.opentelemetry.io/collector/confmap/provider/mdaiprovider"
+	mdaiprovider "github.com/mydecisive/mdaiprovider"
 	envprovider "go.opentelemetry.io/collector/confmap/provider/envprovider"
 	fileprovider "go.opentelemetry.io/collector/confmap/provider/fileprovider"
 	"go.opentelemetry.io/collector/otelcol"
@@ -34,7 +34,7 @@ func main() {
 			},
 		},
 		ProviderModules: map[string]string{
-			mdaiprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "go.opentelemetry.io/collector/confmap/provider/mdaiprovider v0.1.0",
+			mdaiprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "github.com/mydecisive/mdaiprovider v0.2.0",
 			envprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "go.opentelemetry.io/collector/confmap/provider/envprovider v1.48.0",
 			fileprovider.NewFactory().Create(confmap.ProviderSettings{}).Scheme(): "go.opentelemetry.io/collector/confmap/provider/fileprovider v1.48.0",
     	},

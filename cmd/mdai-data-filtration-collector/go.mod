@@ -5,6 +5,7 @@ module go.opentelemetry.io/collector/cmd/builder
 go 1.24.0
 
 require (
+	github.com/mydecisive/mdaiprovider v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.144.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension v0.145.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.144.0
@@ -16,7 +17,6 @@ require (
 	go.opentelemetry.io/collector/confmap v1.51.0
 	go.opentelemetry.io/collector/confmap/provider/envprovider v1.48.0
 	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.51.0
-	go.opentelemetry.io/collector/confmap/provider/mdaiprovider v0.1.0
 	go.opentelemetry.io/collector/connector v0.145.0
 	go.opentelemetry.io/collector/exporter v1.51.0
 	go.opentelemetry.io/collector/exporter/debugexporter v0.144.0
@@ -240,5 +240,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace go.opentelemetry.io/collector/confmap/provider/mdaiprovider => ../../mdaiprovider
