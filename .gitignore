@@ -3,6 +3,7 @@
 .vscode/
 cmd/observer-collector/mdai-observer-collector
 cmd/mdai-collector/mdai-collector
+cmd/mdai-data-filtration-collector/mdai-data-filtration-collector
 vendor/
 sekret.yaml
 secret.yaml

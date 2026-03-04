@@ -1,0 +1,32 @@
+dist:
+  name: mdai-data-filtration-collector
+  description: MyDecisive Data Filtration Collector
+  output_path: ./cmd/mdai-data-filtration-collector
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.144.0
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.144.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.144.0
+  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.144.0
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/datadogreceiver v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/fluentforwardreceiver v0.144.0
+
+extensions:
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension v0.145.0
+
+providers:
+  - gomod:
+      github.com/mydecisive/mdaiprovider v0.2.0
+  - gomod:
+      go.opentelemetry.io/collector/confmap/provider/envprovider v1.48.0
+  - gomod:
+      go.opentelemetry.io/collector/confmap/provider/fileprovider v1.48.0

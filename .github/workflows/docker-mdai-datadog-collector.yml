@@ -1,0 +1,19 @@
+name: Docker push mdai-datadog-collector for new tag
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    tags:
+      - 'v*'
+
+jobs:
+  docker-push:
+    uses: DecisiveAI/ci/.github/workflows/docker-push-to-ghcr.yml@main
+    with:
+      image_name_suffix: mdai-datadog-collector
+      dockerfile_name: mdai-datadog-collector.Dockerfile
+    secrets:
+      SLACK_NOTIFY_URL: ${{ secrets.SLACK_NOTIFY_URL }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
