@@ -22,7 +22,7 @@ receivers:
 
 
 connectors:
-  - gomod: github.com/decisiveai/mdai-collectors/datavolumeconnector v0.1.3
+  - gomod: github.com/mydecisive/mdai-collectors/datavolumeconnector v0.1.3
 
 extensions:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/cgroupruntimeextension v0.121.0
@@ -31,4 +31,4 @@ replaces:
   # a list of "replaces" directives that will be part of the resulting go.mod
 
   # This replace statement is necessary since the newly added component is not found/published to GitHub yet. Replace references to GitHub path with the local path
-  - github.com/decisiveai/mdai-collectors/datavolumeconnector => ../../datavolumeconnector
+  - github.com/mydecisive/mdai-collectors/datavolumeconnector => ../../datavolumeconnector
