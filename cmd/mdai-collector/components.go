@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/collector/otelcol"
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/receiver"
-	datavolumeconnector "github.com/decisiveai/mdai-collectors/datavolumeconnector"
+	datavolumeconnector "github.com/mydecisive/mdai-collectors/datavolumeconnector"
 	routingconnector "github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector"
 	countconnector "github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector"
 	otlpexporter "go.opentelemetry.io/collector/exporter/otlpexporter"
@@ -95,7 +95,7 @@ func components() (otelcol.Factories, error) {
 		return otelcol.Factories{}, err
 	}
 	factories.ConnectorModules = make(map[component.Type]string, len(factories.Connectors))
-	factories.ConnectorModules[datavolumeconnector.NewFactory().Type()] = "github.com/decisiveai/mdai-collectors/datavolumeconnector v0.1.3"
+	factories.ConnectorModules[datavolumeconnector.NewFactory().Type()] = "github.com/mydecisive/mdai-collectors/datavolumeconnector v0.1.3"
 	factories.ConnectorModules[routingconnector.NewFactory().Type()] = "github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.121.0"
 	factories.ConnectorModules[countconnector.NewFactory().Type()] = "github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.121.0"
 

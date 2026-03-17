@@ -9,7 +9,7 @@ on:
 
 jobs:
   docker-push:
-    uses: DecisiveAI/ci/.github/workflows/docker-push-to-ecr.yml@main
+    uses: mydecisive/ci/.github/workflows/docker-push-to-ecr.yml@main
     with:
       image_name_suffix: observer-collector
     secrets:

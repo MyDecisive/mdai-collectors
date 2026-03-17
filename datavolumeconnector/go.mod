@@ -1,6 +1,6 @@
-module github.com/decisiveai/mdai-collectors/datavolumeconnector
+module github.com/mydecisive/mdai-collectors/datavolumeconnector
 
-go 1.23.4
+go 1.25.0
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.117.0

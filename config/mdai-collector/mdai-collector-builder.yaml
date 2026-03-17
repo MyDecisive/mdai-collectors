@@ -22,7 +22,7 @@ receivers:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8seventsreceiver v0.121.0
 
 connectors:
-  - gomod: github.com/decisiveai/mdai-collectors/datavolumeconnector v0.1.3
+  - gomod: github.com/mydecisive/mdai-collectors/datavolumeconnector v0.1.3
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.121.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.121.0
 
@@ -31,4 +31,4 @@ extensions:
 
 replaces:
   # a list of "replaces" directives that will be part of the resulting go.mod
-  - github.com/decisiveai/mdai-collectors/datavolumeconnector => ../../datavolumeconnector
+  - github.com/mydecisive/mdai-collectors/datavolumeconnector => ../../datavolumeconnector
