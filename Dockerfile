@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.23-bookworm AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25-bookworm AS builder
 WORKDIR /app
 COPY . .
 ARG OTEL_VERSION=0.121.0
